@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: connexe-auth
+
+  config:
+    import: configserver:http://localhost:8888
+
+
+  cloud:
+    function:
+      definition: userEvent
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+          producer-properties:
+            key.serializer: org.apache.kafka.common.serialization.StringSerializer
+            value.serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      bindings:
+        userEvent-out-0:
+          destination: user-events
+          contentType: application/protobuf
+        userEvent-in-0:
+          destination: user-events
+          contentType: application/protobuf
+          group: auth-service-group
+
+  codec:
+    max-in-memory-size: 10MB
+  jpa:
+    show-sql: true

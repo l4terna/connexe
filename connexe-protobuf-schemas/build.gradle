@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.google.protobuf' version '0.9.4'
+}
+
+group = 'com.laterna'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.protobuf:protobuf-java:4.28.2'
+    implementation 'com.google.protobuf:protobuf-java-util:4.28.2'
+
+    implementation files("${rootDir}/libs/kafka-protobuf-serializer-7.9.0.jar")
+    implementation files("${rootDir}/libs/kafka-schema-registry-client-7.9.0.jar")
+//    implementation 'io.confluent:kafka-protobuf-serializer:7.9.0'
+//    implementation 'io.confluent:kafka-schema-registry-client:7.9.0'
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.24.3'
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = project.group
+            artifactId = 'protobuf-schemas'
+            version = project.version
+
+            from components.java
+        }
+    }
+}

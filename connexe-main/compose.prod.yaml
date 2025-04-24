@@ -1,0 +1,54 @@
+services:
+  app:
+    container_name: spring-app
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8085:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - APP_CORS_ALLOWED_ORIGINS=http://localhost:5173
+    depends_on:
+      - database
+      - redis
+    networks:
+      - spring-network
+
+  database:
+    container_name: postgres
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=flux
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - spring-network
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    environment:
+      - REDIS_PASSWORD=redis
+    command: sh -c 'redis-server
+      --requirepass "${REDIS_PASSWORD}"
+      --appendonly yes
+      --notify-keyspace-events Ex'
+    networks:
+      - spring-network
+
+networks:
+  spring-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:

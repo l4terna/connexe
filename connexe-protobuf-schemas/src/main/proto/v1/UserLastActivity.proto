@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.laterna.proto.v1;
+
+option java_multiple_files = true;
+option java_package = "com.laterna.proto.v1";
+
+message UserLastActivityDTO {
+  int64 last_activity_timestamp = 1;
+}
+
+message UserLastActivityUpdateDTO {
+  int64 last_activity_timestamp = 1;
+  string fingerprint = 2;
+}

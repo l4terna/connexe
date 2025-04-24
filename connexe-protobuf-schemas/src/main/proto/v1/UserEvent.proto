@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package com.laterna.proto.v1;
+
+option java_multiple_files = true;
+option java_package = "com.laterna.proto.v1";
+
+message UserDataProto {
+  int64 userId = 1;
+  string login = 2;
+  string email = 3;
+  int64 createdAt = 6;
+  int64 updatedAt = 7;
+}
+
+enum UserEventType {
+  USER_CREATED = 0;
+  USER_UPDATED = 1;
+  USER_DELETED = 2;
+}
+
+message UserEvent {
+  UserEventType eventType = 1;
+
+  oneof payload {
+    UserDataProto createdUser = 2;
+    UserDataProto updatedUser = 3;
+    int64 deletedUserId = 4;
+  }
+}
+
+message UserEventProduce {
+  UserEvent userEvent = 1;
+}

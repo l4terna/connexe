@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: connexe-gateway
+  config:
+    import: optional:configserver:http://localhost:8888
+  cloud:
+    loadbalancer:
+      enabled: true

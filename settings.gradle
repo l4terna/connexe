@@ -1,0 +1,9 @@
+rootProject.name = 'connexe'
+
+include 'connexe-eureka-server'
+include 'connexe-config-server'
+include 'connexe-gateway'
+include 'connexe-auth'
+include 'connexe-main'
+include 'connexe-protobuf-schemas'
+

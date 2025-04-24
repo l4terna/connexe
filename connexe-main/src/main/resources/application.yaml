@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: connexe-main
+  config:
+    import: configserver:http://localhost:8888
+
+
+  cloud:
+    function:
+      definition: userEvent
+    stream:
+      kafka:
+        binder:
+          auto-create-topics: true
+          brokers: localhost:9092
+          consumer-properties:
+            key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      bindings:
+        userEvent-in-0:
+          destination: user-events
+          contentType: application/protobuf
+          group: main-service-group
+        userEvent-out-0:
+          destination: user-events
+          contentType: application/protobuf
+
+  codec:
+    max-in-memory-size: 10MB

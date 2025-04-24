@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.laterna'
+version = '1.0-SNAPSHOT'
+
+ext {
+    springBootVersion = '3.4.4'
+    springCloudVersion = '2024.0.1'
+    protobufVersion = '4.30.2'
+    lombokVersion = '1.18.30'
+    mapstructVersion = '1.6.3'
+    confluentVersion = '7.9.0'
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    group = 'com.laterna'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    dependencies {
+        implementation fileTree(dir: "${rootProject.projectDir}/libs", include: ['*.jar'])
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.incremental = true
+        options.fork = true
+        options.failOnError = true
+    }
+
+    tasks.withType(Test).tap {
+        configureEach {
+            maxParallelForks = Math.max(Runtime.runtime.availableProcessors() - 1, 1)
+            forkEvery = 100
+            reports.html.required = false
+            reports.junitXml.required = false
+        }
+    }
+}
