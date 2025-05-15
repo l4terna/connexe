@@ -7,16 +7,13 @@ import java.util.BitSet;
 @Getter
 public enum Permission {
     // General
-//    1100000
-//    00000000001
-//    0000000
     VIEW_CHANNELS(0),
     MANAGE_CHANNELS(1),
     MANAGE_ROLES(2),
     MANAGE_CATEGORIES(15), // <-- max
 
     // Member
-    CREATE_INVITE(3),
+    MANAGE_INVITES(3),
 
     // Text
     SEND_MESSAGES(4),

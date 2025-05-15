@@ -197,18 +197,27 @@ public class MessageService {
     private List<MessageDTO> enrichGroupDirectAndTextMessagesWithStatus(List<Message> messages, User currentUser) {
         Set<Long> messageIds = messages.stream().map(Message::getId).collect(Collectors.toSet());
 
-        Map<Long, Long> readStatusCount = messageReadStatusService.countReadStatusesByMessageIds(messageIds);
+        Map<Long, Set<Long>> readStatusCount = messageReadStatusService.countReadStatusesByMessageIds(messageIds);
 
         return messages.stream()
                 .map(message -> {
+                    Set<Long> statusCount = readStatusCount.get(message.getId());
+
                     if (message.getAuthor().getId().equals(currentUser.getId())) {
-                        long count = readStatusCount.get(message.getId()) == null ? 0 : readStatusCount.get(message.getId());
-                        MessageStatus status =
-                                count > 0 ? MessageStatus.READ : MessageStatus.SENT;
-                        return messageMapper.toDTO(message, status, count);
+                        long count = statusCount == null ? 0 : readStatusCount.get(message.getId())
+                                .stream()
+                                .filter(rscUserId -> !rscUserId.equals(currentUser.getId()))
+                                .count();
+
+                        return messageMapper.toDTO(message, MessageStatus.READ, count);
                     }
 
-                    return messageMapper.toDTO(message);
+                    MessageStatus status =
+                            statusCount == null ? MessageStatus.NEW :
+                                    statusCount
+                                    .stream()
+                                    .anyMatch(rscUserId -> rscUserId.equals(currentUser.getId())) ? MessageStatus.READ : MessageStatus.NEW;
+                    return messageMapper.toDTO(message, status);
                 })
                 .toList();
     }

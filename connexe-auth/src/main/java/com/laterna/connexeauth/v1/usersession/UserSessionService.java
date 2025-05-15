@@ -1,5 +1,7 @@
 package com.laterna.connexeauth.v1.usersession;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import com.laterna.connexeauth.v1.token.access.AccessTokenService;
 import com.laterna.connexeauth.v1.token.refresh.RefreshTokenService;
 import com.laterna.connexeauth.v1.user.User;
@@ -9,7 +11,6 @@ import com.laterna.proto.v1.UserLastActivityDTO;
 import com.laterna.proto.v1.UserLastActivityUpdateDTO;
 import eu.bitwalker.useragentutils.UserAgent;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Arrays;
 
 
 @Service
@@ -84,19 +84,6 @@ public class UserSessionService {
         return httpServletRequest.getRemoteAddr();
     }
 
-    public String getFingerprint() {
-        if (httpServletRequest.getCookies() == null) {
-            return null;
-        }
-
-        Cookie cookie =  Arrays.stream(httpServletRequest.getCookies())
-                .filter(c -> c.getName().equals("__fprid"))
-                .findFirst()
-                .orElse(null);
-
-        return cookie == null ? null : cookie.getValue();
-    }
-
     @Transactional
     public void deactivateSessionCompletely(UserSession userSession) {
         userSession.setIsActive(false);
@@ -115,8 +102,10 @@ public class UserSessionService {
     }
 
     @Transactional(readOnly = true)
-    public Page<UserSessionDTO> getUserSessions(Pageable pageable, User currentUser) {
-        return userSessionRepository.findAllAnotherActiveSessions(pageable, findUserSessionByUserId(currentUser.getId()))
+    public Page<UserSessionDTO> getUserSessions(Pageable pageable, User currentUser, String fingerprint) {
+        return userSessionRepository.findAllAnotherActiveSessions(
+                pageable, findUserSessionByUserIdAndFingerprint(currentUser.getId(), fingerprint)
+                )
                 .map(userSessionMapper::toDTO);
     }
 
@@ -138,14 +127,13 @@ public class UserSessionService {
     }
 
     @Transactional
-    public void deactivateAllOtherUserSessions(User currentUser) {
-        UserSession userSession = findUserSessionByUserId(currentUser.getId());
+    public void deactivateAllOtherUserSessions(User currentUser, String fingerprint) {
+        UserSession userSession = findUserSessionByUserIdAndFingerprint(currentUser.getId(), fingerprint);
         userSessionRepository.deactivateAllOtherSessions(userSession);
     }
 
     @Transactional(readOnly = true)
-    public UserSession findUserSessionByUserId(Long userId) {
-        String fingerprint = getFingerprint();
+    public UserSession findUserSessionByUserIdAndFingerprint(Long userId, String fingerprint) {
         return userSessionRepository.findActiveByFingerprintAndUserId(fingerprint, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Session not found"));
     }
@@ -160,8 +148,13 @@ public class UserSessionService {
     }
 
     @Transactional(readOnly = true)
-    public UserLastActivityDTO getLastActivity(Long userId) {
+    public String getLastActivity(Long userId) {
         Instant lastActivity = userSessionRepository.findMaxLastActivityByUserId(userId).orElse(Instant.now());
-        return UserLastActivityDTO.newBuilder().setLastActivityTimestamp(lastActivity.toEpochMilli()).build();
+
+        try {
+            return JsonFormat.printer().preservingProtoFieldNames().print(UserLastActivityDTO.newBuilder().setLastActivityTimestamp(lastActivity.toEpochMilli()).build());
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

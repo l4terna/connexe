@@ -1,4 +1,4 @@
-package com.laterna.connexemain.v1.message.read;
+package com.laterna.connexemain.v1.message.read.dto;
 
 
 import java.util.Set;

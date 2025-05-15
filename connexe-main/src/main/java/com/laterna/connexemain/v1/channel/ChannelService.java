@@ -47,7 +47,7 @@ public class ChannelService {
     public ChannelDTO update(Long id, UpdateChannelDTO updateChannelDTO, User currentUser) {
         Channel channel = findChannelById(id);
 
-        if (channel.getType() != ChannelType.TEXT && channel.getType() == ChannelType.VOICE) {
+        if (channel.getType() != ChannelType.TEXT && channel.getType() != ChannelType.VOICE) {
             throw new IllegalArgumentException("Invalid channel type");
         }
 
@@ -70,7 +70,7 @@ public class ChannelService {
 
             if(newPosition > channel.getPosition()) {
                 shiftPositions(category.getId(), channel.getPosition() + 1, newPosition, -1);
-            } else if (newPosition < category.getPosition()) {
+            } else if (newPosition < channel.getPosition()) {
                 shiftPositions(category.getId(), newPosition, channel.getPosition(), 1);
             }
 

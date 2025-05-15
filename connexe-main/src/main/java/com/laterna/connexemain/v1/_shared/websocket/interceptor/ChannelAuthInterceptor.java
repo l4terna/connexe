@@ -35,7 +35,15 @@ public class ChannelAuthInterceptor implements ChannelInterceptor {
                 String token = authorization.get(0);
 
                 if (token != null && token.startsWith("Bearer ")) {
-                    Long userId = authServiceClient.validateToken(token).block();
+                    Map<String, Object> attrs = accessor.getSessionAttributes();
+
+                    if (attrs == null || attrs.get("__fprid") == null) {
+                        throw new MessagingException("Unauthorized");
+                    }
+
+                    Long userId = authServiceClient.validateToken(token, attrs.get("__fprid").toString());
+
+                    if (userId == null ) throw new MessagingException("Unauthorized");
 
                     try {
                         User user = userService.findUserById(userId);
@@ -45,10 +53,6 @@ public class ChannelAuthInterceptor implements ChannelInterceptor {
                                     new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                             accessor.setUser(auth);
 
-                            Map<String, Object> attrs = accessor.getSessionAttributes();
-                            if (attrs == null) {
-                                attrs = new HashMap<>();
-                            }
                             attrs.put("userId", user.getId());
                             accessor.setSessionAttributes(attrs);
                         }

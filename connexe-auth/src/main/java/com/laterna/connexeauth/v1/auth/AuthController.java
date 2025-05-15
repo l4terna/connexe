@@ -53,8 +53,11 @@ public class AuthController {
     }
 
     @PostMapping("/validate-token")
-    public ResponseEntity<Long> validateToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
-        Long validationResult = authService.validateToken(authHeader);
+    public ResponseEntity<Long> validateToken(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @CookieValue("__fprid") String fingerprint
+    ) {
+        Long validationResult = authService.validateToken(authHeader, fingerprint);
 
         return validationResult == null ?
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED).build() : ResponseEntity.ok(validationResult);

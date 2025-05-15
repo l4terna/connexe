@@ -1,9 +1,9 @@
 package com.laterna.connexemain.v1.hub;
 
+import com.laterna.connexemain.v1.hub.avatar.HubAvatarService;
 import com.laterna.connexemain.v1.hub.dto.HubDTO;
 import com.laterna.connexemain.v1.hub.dto.UpdateHubDTO;
 import com.laterna.connexemain.v1.hub.enumeration.HubType;
-import com.laterna.connexemain.v1.hub.avatar.HubAvatarService;
 import com.laterna.connexemain.v1.permission.PermissionService;
 import com.laterna.connexemain.v1.permission.enumeration.Permission;
 import com.laterna.connexemain.v1.user.User;
@@ -27,8 +27,8 @@ public class HubService {
     private final HubAvatarService hubAvatarService;
 
     @Transactional(readOnly = true)
-    public Page<HubDTO> getAllHubs(Pageable pageable) {
-        return hubRepository.findAll(pageable)
+    public Page<HubDTO> getAllHubs(Pageable pageable, String name) {
+        return hubRepository.findAllByNameLikeIgnoreCase("%" + name + "%", pageable)
                 .map(hubMapper::toDTO);
     }
 
@@ -96,7 +96,9 @@ public class HubService {
                 .orElseThrow(() -> new EntityNotFoundException("Hub not found by channel id: " + channelId));
     }
 
+    @Transactional(readOnly = true)
     public Set<Long> findAllHubIdsByUserId(Long userId) {
         return hubRepository.findAllHubIdsByUserId(userId);
     }
+
 }

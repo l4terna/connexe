@@ -18,15 +18,11 @@ interface MessageReadStatusRepository extends JpaRepository<MessageReadStatus, L
             "WHERE mrs.messageId = :messageId AND mrs.userId IN :userIds")
     Set<MessageReadStatus> findAllByMessageIdAndUserIds(Long messageId, Set<Long> userIds);
 
-    @Query("SELECT mrs.messageId, count(*) FROM MessageReadStatus mrs " +
+    @Query("SELECT mrs.messageId, mrs.userId FROM MessageReadStatus mrs " +
             "WHERE mrs.messageId IN :messageIds " +
-            "GROUP BY mrs.messageId")
+            "GROUP BY mrs.messageId, mrs.userId")
     List<Long[]> countByMessageIds(Set<Long> messageIds);
 
     long countByMessageId(Long messageId);
 
-    @Query("SELECT mrs FROM MessageReadStatus mrs " +
-            "WHERE mrs.messageId IN :messageIds " +
-            "AND mrs.userId = :userId")
-    Set<MessageReadStatus> findAllByMessageIdsAndUserId(Set<Long> messageIds, Long userId);
 }

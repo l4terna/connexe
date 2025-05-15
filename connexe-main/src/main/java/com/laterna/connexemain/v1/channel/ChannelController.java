@@ -24,7 +24,7 @@ public class ChannelController {
 
     @GetMapping
     public ResponseEntity<Page<ChannelDTO>> getDirectAndGroupChannels(
-            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(channelService.getDirectAndGroupChannels(pageable, user));
     }

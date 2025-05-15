@@ -89,10 +89,10 @@ public class AuthService {
     private void saveFingerprintCookie(HttpServletResponse response, String fingerprint) {
         ResponseCookie fingerprintCookie = ResponseCookie.from("__fprid", fingerprint)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
 //                .partitioned(true)
                 .path("/")
-                .sameSite("Lax")
+                .sameSite("None")
                 .maxAge(jwtService.getJwtRefreshExpiration())
                 .build();
 
@@ -117,10 +117,10 @@ public class AuthService {
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from("__rtid", refreshToken.getToken())
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
 //                .partitioned(true)
                 .path("/api/v1/auth")
-                .sameSite("Lax")
+                .sameSite("None")
                 .maxAge(jwtService.getJwtRefreshExpiration())
                 .build();
 
@@ -144,19 +144,19 @@ public class AuthService {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("__rtid", "")
                 .httpOnly(true)
                 .maxAge(0)
-                .secure(false)
+                .secure(true)
 //                .partitioned(true)
                 .path("/api/v1/auth")
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
 
         ResponseCookie fingerprintCookie = ResponseCookie.from("__fprid", fingerprint)
                 .httpOnly(true)
                 .maxAge(0)
-                .secure(false)
+                .secure(true)
 //                .partitioned(true)
                 .path("/")
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
@@ -189,10 +189,7 @@ public class AuthService {
     }
 
     @Transactional
-    public Long validateToken(String authHeader) {
-//            String fingerprint = userSessionService.getFingerprint(); // TODO: ИСПРАВИТЬ НА ПРОДЕ
-        String fingerprint = "string";
-
+    public Long validateToken(String authHeader, String fingerprint) {
         if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ")) {
             return null;
         }

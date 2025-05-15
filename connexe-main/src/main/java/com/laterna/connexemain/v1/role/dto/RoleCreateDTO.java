@@ -2,7 +2,7 @@ package com.laterna.connexemain.v1.role.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record CreateRoleDTO(
+public record RoleCreateDTO(
         @NotBlank
         String name,
         @NotBlank

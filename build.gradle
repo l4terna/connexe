@@ -5,15 +5,6 @@ plugins {
 group = 'com.laterna'
 version = '1.0-SNAPSHOT'
 
-ext {
-    springBootVersion = '3.4.4'
-    springCloudVersion = '2024.0.1'
-    protobufVersion = '4.30.2'
-    lombokVersion = '1.18.30'
-    mapstructVersion = '1.6.3'
-    confluentVersion = '7.9.0'
-}
-
 
 repositories {
     mavenCentral()

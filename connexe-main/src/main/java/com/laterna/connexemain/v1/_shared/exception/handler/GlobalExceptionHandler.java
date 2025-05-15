@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestControllerAdvice
@@ -116,6 +117,7 @@ public class GlobalExceptionHandler implements ErrorController {
                 .type(type)
                 .message(message)
                 .statusCode(statusCode)
+                .timestamp(Instant.EPOCH)
                 .path(request.getRequestURI())
                 .build();
     }
@@ -125,6 +127,7 @@ public class GlobalExceptionHandler implements ErrorController {
                 .type(type)
                 .errors(errors)
                 .statusCode(statusCode)
+                .timestamp(Instant.EPOCH)
                 .path(request.getRequestURI())
                 .build();
     }

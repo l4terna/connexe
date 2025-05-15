@@ -20,9 +20,10 @@ public class UserSessionController {
     @GetMapping
     public ResponseEntity<Page<UserSessionDTO>> getUserSessions(
             @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal User user,
+            @CookieValue("__fprid") String fingerprint
     ) {
-        return ResponseEntity.ok(userSessionService.getUserSessions(pageable, user));
+        return ResponseEntity.ok(userSessionService.getUserSessions(pageable, user, fingerprint));
     }
 
     @DeleteMapping("/{id}")
@@ -32,8 +33,11 @@ public class UserSessionController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> revokeAllOtherUserSessions(@AuthenticationPrincipal User user) {
-        userSessionService.deactivateAllOtherUserSessions(user);
+    public ResponseEntity<Void> revokeAllOtherUserSessions(
+            @AuthenticationPrincipal User user,
+            @CookieValue("__fprid") String fingerprint
+    ) {
+        userSessionService.deactivateAllOtherUserSessions(user, fingerprint);
         return ResponseEntity.noContent().build();
     }
 }

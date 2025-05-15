@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 
 @EqualsAndHashCode(callSuper = true)
@@ -32,7 +33,7 @@ public class Invite extends BaseEntity {
     private Boolean isActive = true;
 
     @Column(nullable = false)
-    private OffsetDateTime expiresAt;
+    private Instant expiresAt;
 
     @ManyToOne
     @JoinColumn(name = "hub_id")

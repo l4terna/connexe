@@ -14,7 +14,7 @@ public class HubMemberProviderService {
 
     @Transactional(readOnly = true)
     public HubMember findMemberByHubIdAndUserId(Long hubId, Long userId) {
-        return hubMemberRepository.findByUserIdAndHubId(userId, hubId)
+        return hubMemberRepository.findByHubIdAndUserId(hubId, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Member not found"));
     }
 

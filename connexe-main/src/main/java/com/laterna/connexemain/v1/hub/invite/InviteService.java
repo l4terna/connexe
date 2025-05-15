@@ -2,10 +2,10 @@ package com.laterna.connexemain.v1.hub.invite;
 
 import com.laterna.connexemain.v1.hub.Hub;
 import com.laterna.connexemain.v1.hub.HubService;
-import com.laterna.connexemain.v1.hub.member.HubMemberService;
 import com.laterna.connexemain.v1.hub.invite.dto.AcceptInviteDTO;
 import com.laterna.connexemain.v1.hub.invite.dto.CreateInviteDTO;
 import com.laterna.connexemain.v1.hub.invite.dto.InviteDTO;
+import com.laterna.connexemain.v1.hub.member.HubMemberService;
 import com.laterna.connexemain.v1.permission.PermissionService;
 import com.laterna.connexemain.v1.permission.enumeration.Permission;
 import com.laterna.connexemain.v1.user.User;
@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 @Service
@@ -38,12 +39,12 @@ public class InviteService {
     public InviteDTO create(Long hubId, CreateInviteDTO createInviteDTO, User currentUser) {
         Hub hub = hubService.findHubById(hubId);
 
-        permissionService.hasPermissionsThrow(currentUser.getId(), hubId, Permission.CREATE_INVITE);
+        permissionService.hasPermissionsThrow(currentUser.getId(), hubId, Permission.MANAGE_INVITES);
 
-        OffsetDateTime expiresAt = createInviteDTO.expiresAt();
+        Instant expiresAt = createInviteDTO.expiresAt();
 
         if (expiresAt == null) {
-            expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(7);
+            expiresAt = LocalDateTime.now().plusDays(14).toInstant(ZoneOffset.UTC);
         }
 
         Invite invite = Invite.builder()
@@ -74,7 +75,7 @@ public class InviteService {
         // maxUses = null = endless uses
         if (!invite.getIsActive() ||
                 (invite.getMaxUses() != null && invite.getMaxUses() <= invite.getCurrentUses()) ||
-                invite.getExpiresAt().isBefore(OffsetDateTime.now(ZoneOffset.UTC))
+                invite.getExpiresAt().isBefore(Instant.now())
         ) {
             throw new AccessDeniedException("Code expired");
         }
@@ -94,9 +95,8 @@ public class InviteService {
     @Transactional
     public void delete(Long hubId, Long inviteId, User currentUser) {
         Hub hub = hubService.findHubById(hubId);
-        if (!hub.getOwner().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("Permission denied");
-        }
+
+        permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.MANAGE_INVITES);
 
         inviteRepository.deleteById(inviteId);
     }

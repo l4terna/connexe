@@ -39,17 +39,15 @@ public class MessageReadStatusService {
     }
 
     @Transactional(readOnly = true)
-    public Set<MessageReadStatus> findReadStatusesByMessageIdsAndUserId(Set<Long> messageIds, Long userId) {
-        return messageReadStatusRepository.findAllByMessageIdsAndUserId(messageIds, userId);
-    }
-
-    @Transactional(readOnly = true)
-    public Map<Long, Long> countReadStatusesByMessageIds(Set<Long> messageIds) {
+    public Map<Long, Set<Long>> countReadStatusesByMessageIds(Set<Long> messageIds) {
         return messageReadStatusRepository.countByMessageIds(messageIds)
                 .stream()
-                .collect(Collectors.toMap(
-                        arr -> arr[0], // message id
-                        arr -> arr[1]  // count of reads
+                .collect(Collectors.groupingBy(
+                        row -> (Long) row[0], // messageId
+                        Collectors.mapping(
+                                row -> (Long) row[1], // userId
+                                Collectors.toSet() // Set<Long>
+                        )
                 ));
     }
 

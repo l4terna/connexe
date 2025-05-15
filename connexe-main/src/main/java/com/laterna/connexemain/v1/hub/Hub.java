@@ -15,7 +15,6 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "hubs")
 public class Hub extends BaseEntity {

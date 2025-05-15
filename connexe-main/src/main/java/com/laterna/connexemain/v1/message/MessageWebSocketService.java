@@ -1,6 +1,7 @@
 package com.laterna.connexemain.v1.message;
 
 import com.laterna.connexemain.v1._shared.websocket.dto.WebSocketMessage;
+import com.laterna.connexemain.v1._shared.websocket.enumeration.WebSocketMessageType;
 import com.laterna.connexemain.v1.message.dto.MessageDTO;
 import com.laterna.connexemain.v1.message.read.MessageReadStatusService;
 import com.laterna.connexemain.v1.message.read.enumeration.MessageStatus;
@@ -43,7 +44,7 @@ public class MessageWebSocketService {
         userIds.forEach(userId -> {
             MessageDTO messageWithStatus = computeMessageDTOWithStatus(message, userId, userReadStatus);
 
-            WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_CREATE")
+            WebSocketMessage wsMessage = WebSocketMessage.builder(WebSocketMessageType.MESSAGE_CREATE)
                     .add("message", messageWithStatus)
                     .build();
 
@@ -60,7 +61,7 @@ public class MessageWebSocketService {
         userIds.forEach(userId -> {
             MessageDTO messageWithStatus = computeMessageDTOWithStatus(message, userId, userReadStatus);
 
-            WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_UPDATE")
+            WebSocketMessage wsMessage = WebSocketMessage.builder(WebSocketMessageType.MESSAGE_UPDATE)
                     .add("message", messageWithStatus)
                     .build();
 
@@ -87,7 +88,7 @@ public class MessageWebSocketService {
     }
 
     public void messageDeleted(Long messageId, Long channelId) {
-        WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_DELETE")
+        WebSocketMessage wsMessage = WebSocketMessage.builder(WebSocketMessageType.MESSAGE_DELETE)
                 .add("messageId", messageId)
                 .add("channelId", channelId)
                 .build();

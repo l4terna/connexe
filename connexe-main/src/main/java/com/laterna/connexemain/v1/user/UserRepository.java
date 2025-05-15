@@ -1,5 +1,8 @@
 package com.laterna.connexemain.v1.user;
 
+import io.netty.util.AsyncMapping;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,4 +19,6 @@ interface UserRepository extends JpaRepository<User, Long> {
     Set<Long> findUserIdsByEmails(Set<String> emails);
 
     boolean existsByLogin(String login);
+
+    Page<User> findByLoginLikeIgnoreCase(String login, Pageable pageable);
 }

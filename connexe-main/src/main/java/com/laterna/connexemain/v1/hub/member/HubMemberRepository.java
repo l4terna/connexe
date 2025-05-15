@@ -15,11 +15,13 @@ import java.util.Set;
 
 @Repository
 interface HubMemberRepository extends JpaRepository<HubMember, Long> {
+    @EntityGraph(attributePaths = {"roles"})
     Optional<HubMember> findByHubAndUser(Hub hub, User user);
 
-    @EntityGraph(attributePaths = {"hub", "hub.owner"})
-    Optional<HubMember> findByUserIdAndHubId(Long userId, Long hubId);
+    @EntityGraph(attributePaths = {"hub", "hub.owner", "roles"})
+    Optional<HubMember> findByHubIdAndUserId(Long userId, Long hubId);
 
+    @EntityGraph(attributePaths = {"roles"})
     @Query("""
     SELECT hm FROM HubMember hm
     WHERE hm.hub.id = :hubId AND (:after IS NULL OR hm.user.id > :after)

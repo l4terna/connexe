@@ -6,6 +6,10 @@ import com.laterna.connexemain.v1.user.dto.UserProfileDTO;
 import com.laterna.connexemain.v1.user.dto.UserUpdateDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +20,14 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+
+    @GetMapping
+    public ResponseEntity<Page<UserDTO>> getUsers(
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(value = "login", required = false, defaultValue = "") String login
+    ) {
+        return ResponseEntity.ok(userService.getAllUsers(pageable, login));
+    }
 
     @PutMapping("/@me")
     public ResponseEntity<UserDTO> updateMe(

@@ -50,6 +50,13 @@ public class JwtAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Jw
                         .post()
                         .uri("lb://connexe-auth/api/v1/auth/validate-token")
                         .header(HttpHeaders.AUTHORIZATION, authHeader)
+                        .cookies(cookies -> {
+                            request.getCookies().forEach((key, values) -> {
+                                values.forEach(cookie -> {
+                                   cookies.add(cookie.getName(), cookie.getValue());
+                                });
+                            });
+                        })
                         .retrieve()
                         .bodyToMono(Long.class)
                         .map(userId -> {

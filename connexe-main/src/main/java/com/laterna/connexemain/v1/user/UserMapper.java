@@ -33,7 +33,7 @@ public abstract class UserMapper {
         }
 
         return userSessionServiceClient.getLastActivity(userId)
-                .map(lastActivity -> Instant.ofEpochMilli(lastActivity.getLastActivityTimestamp()))
+                .map(lastActivity -> Instant.now())
                 .block();
     }
 }

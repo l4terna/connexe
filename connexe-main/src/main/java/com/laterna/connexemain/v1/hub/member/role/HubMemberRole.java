@@ -1,11 +1,13 @@
 package com.laterna.connexemain.v1.hub.member.role;
 
 import com.laterna.connexemain.v1._shared.model.entity.IdEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import lombok.*;
+import com.laterna.connexemain.v1.hub.member.HubMember;
+import com.laterna.connexemain.v1.role.Role;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @EqualsAndHashCode(callSuper = true)
@@ -18,9 +20,11 @@ import lombok.experimental.SuperBuilder;
         uniqueConstraints = @UniqueConstraint(columnNames = {"hub_member_id", "role_id"})
 )
 public class HubMemberRole extends IdEntity {
-    @Column(nullable = false)
-    private Long hubMemberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false, name = "hub_member_id")
+    private HubMember hubMember;
 
-    @Column(nullable = false)
-    private Long roleId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false, name = "role_id")
+    private Role role;
 }

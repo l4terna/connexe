@@ -26,9 +26,17 @@ public class HubMemberController {
     @GetMapping
     public ResponseEntity<List<HubMemberDTO>> getMembers(
             @PathVariable Long hubId,
-            @RequestParam(name = "after") Long after
+            @RequestParam(name = "after", required = false) Long after
     ) {
         return ResponseEntity.ok(hubMemberService.getAllMembers(hubId, after));
+    }
+
+    @GetMapping("/@me")
+    public ResponseEntity<HubMemberDTO> getMemberMe(
+            @PathVariable Long hubId,
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(hubMemberService.getMemberMe(hubId, user));
     }
 
     @DeleteMapping("/{memberId}")

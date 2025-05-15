@@ -13,6 +13,7 @@ import java.util.List;
 public interface MessageMapper {
     @Mapping(target = "attachments", expression = "java(getAttachmentKeys(message))")
     @Mapping(target = "readByCount", ignore = true)
+    @Mapping(target = "status", ignore = true)
     MessageDTO toDTO(Message message);
 
     @Mapping(target = "status", expression = "java(status.getValue())")
@@ -26,9 +27,9 @@ public interface MessageMapper {
     MessageDTO toDTO(Message message, MessageStatus status, long readByCount);
 
     default List<String> getAttachmentKeys(Message message) {
-        return message.getAttachments()
+        return message.getAttachments() != null ? message.getAttachments()
                 .stream()
                 .map(Media::getStorageKey)
-                .toList();
+                .toList() : null;
     }
 }

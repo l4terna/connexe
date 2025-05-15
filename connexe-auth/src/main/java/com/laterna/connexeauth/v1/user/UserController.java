@@ -1,9 +1,9 @@
 package com.laterna.connexeauth.v1.user;
 
 import com.laterna.connexeauth.v1.usersession.UserSessionService;
-import com.laterna.proto.v1.UserLastActivityDTO;
 import com.laterna.proto.v1.UserLastActivityUpdateDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserSessionService userSessionService;
 
-    @GetMapping("/{id}/last-activity")
-    public ResponseEntity<UserLastActivityDTO> getLastActivity(@PathVariable Long id) {
+    @GetMapping(value = "/{id}/last-activity", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getLastActivity(@PathVariable Long id) {
         return ResponseEntity.ok(userSessionService.getLastActivity(id));
     }
 

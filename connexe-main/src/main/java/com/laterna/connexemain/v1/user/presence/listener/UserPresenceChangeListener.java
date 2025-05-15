@@ -1,6 +1,7 @@
 package com.laterna.connexemain.v1.user.presence.listener;
 
 import com.laterna.connexemain.v1._shared.websocket.dto.WebSocketMessage;
+import com.laterna.connexemain.v1._shared.websocket.enumeration.WebSocketMessageType;
 import com.laterna.connexemain.v1.user.UserService;
 import com.laterna.connexemain.v1.user.dto.UserDTO;
 import com.laterna.connexemain.v1.user.presence.event.UserPresenceChangeChannelEvent;
@@ -20,7 +21,7 @@ public class UserPresenceChangeListener {
     public void handlePresenceChangeHubEvent(UserPresenceChangeHubEvent event) {
         UserDTO user = userService.findById(event.userId());
 
-        WebSocketMessage wsm = WebSocketMessage.builder("USER_PRESENCE_CHANGE")
+        WebSocketMessage wsm = WebSocketMessage.builder(WebSocketMessageType.USER_PRESENCE_CHANGE)
                 .add("user", user)
                 .build();
 
@@ -34,7 +35,7 @@ public class UserPresenceChangeListener {
     public void handlePresenceChangeChannelEvent(UserPresenceChangeChannelEvent event) {
         UserDTO user = userService.findById(event.userId());
 
-        WebSocketMessage wsm = WebSocketMessage.builder("USER_STATUS_CHANGE")
+        WebSocketMessage wsm = WebSocketMessage.builder(WebSocketMessageType.USER_STATUS_CHANGE)
                 .add("user", user)
                 .build();
 

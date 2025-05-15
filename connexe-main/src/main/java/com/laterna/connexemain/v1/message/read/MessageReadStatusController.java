@@ -1,9 +1,11 @@
 package com.laterna.connexemain.v1.message.read;
 
+import com.laterna.connexemain.v1.message.read.dto.MessageBulkReadDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;

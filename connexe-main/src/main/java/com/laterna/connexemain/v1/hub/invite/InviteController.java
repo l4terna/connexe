@@ -23,7 +23,7 @@ public class InviteController {
     @GetMapping
     public ResponseEntity<Page<InviteDTO>> getAllInvites(
             @PathVariable Long hubId,
-            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(inviteService.getAllInvites(hubId, pageable));
     }

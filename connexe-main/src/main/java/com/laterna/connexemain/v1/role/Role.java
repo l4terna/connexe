@@ -2,10 +2,14 @@ package com.laterna.connexemain.v1.role;
 
 import com.laterna.connexemain.v1._shared.model.entity.BaseEntity;
 import com.laterna.connexemain.v1.hub.Hub;
+import com.laterna.connexemain.v1.hub.member.role.HubMemberRole;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnTransformer;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -36,4 +40,6 @@ public class Role extends BaseEntity {
     @JoinColumn(name = "hub_id", nullable = false)
     private Hub hub;
 
+    @OneToMany(mappedBy = "role", orphanRemoval = true)
+    private Set<HubMemberRole> hubMemberRoles = new HashSet<>();
 }

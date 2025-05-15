@@ -1,7 +1,9 @@
 package com.laterna.connexemain.v1.message.read;
 
 import com.laterna.connexemain.v1._shared.websocket.dto.WebSocketMessage;
+import com.laterna.connexemain.v1._shared.websocket.enumeration.WebSocketMessageType;
 import com.laterna.connexemain.v1.message.MessageService;
+import com.laterna.connexemain.v1.message.read.dto.MessageBulkReadDTO;
 import com.laterna.connexemain.v1.user.User;
 import com.laterna.connexemain.v1.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +56,8 @@ public class MessageReadStatusMarksService {
 
             messageReadStatusRepository.saveAll(messageStatusesToSave);
 
+            // TODO: ДОБАВИТЬ ОТПРАВКУ СООБЩЕНИЙ ЧЕРЕЗ КАФКУ
+
             authorIds.forEach(authorId -> {
                 sendReadStatusToMessageAuthor(authorId, channelId, unreadMessageIds);
             });
@@ -65,7 +69,7 @@ public class MessageReadStatusMarksService {
         messageRange.put("from", messageIds.stream().min(Long::compareTo).get());
         messageRange.put("to", messageIds.stream().max(Long::compareTo).get());
 
-        WebSocketMessage wsMessage =  WebSocketMessage.builder("MESSAGE_READ_STATUS")
+        WebSocketMessage wsMessage =  WebSocketMessage.builder(WebSocketMessageType.MESSAGE_READ_STATUS)
                 .add("message_range", messageRange)
                 .add("channel_id", channelId)
                 .build();

@@ -25,13 +25,17 @@ public class HubController {
     private final HubCreationService hubCreationService;
 
     @GetMapping
-    public ResponseEntity<Page<HubDTO>> getAllHubs(@PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(hubService.getAllHubs(pageable));
+    public ResponseEntity<Page<HubDTO>> getAllHubs(
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(value = "name", required = false, defaultValue = "") String name
+
+    ) {
+        return ResponseEntity.ok(hubService.getAllHubs(pageable, name));
     }
 
     @GetMapping("/@me")
     public ResponseEntity<Page<HubDTO>> getAllUserHubs(
-            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(hubService.getAllUserHubs(pageable, user));
@@ -75,4 +79,5 @@ public class HubController {
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(hubEntitiesService.getHubEntities(id, user));
     }
+
 }

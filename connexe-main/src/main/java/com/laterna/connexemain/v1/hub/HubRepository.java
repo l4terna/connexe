@@ -6,11 +6,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 @Repository
 interface HubRepository extends JpaRepository<Hub, Long> {
+
+    Page<Hub> findAllByNameLikeIgnoreCase(String name, Pageable pageable);
+
     @Query("""
     SELECT h FROM Hub h
     JOIN Category ct ON ct.hub.id = h.id
@@ -29,8 +33,8 @@ interface HubRepository extends JpaRepository<Hub, Long> {
     @Query("""
     SELECT h.id FROM Hub h
     JOIN HubMember hm ON h.id = hm.hub.id
-    LEFT JOIN HubMemberRole hmr ON hmr.hubMemberId = hm.id
-    LEFT JOIN Role r ON hmr.roleId = r.id
+    LEFT JOIN HubMemberRole hmr ON hmr.hubMember.id = hm.id
+    LEFT JOIN Role r ON hmr.role.id = r.id
     WHERE h.owner.id = :userId OR hm.user.id = :userId
     GROUP BY h.id
 """)

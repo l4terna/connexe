@@ -26,23 +26,46 @@ public class UserIdAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        try {
-            Long userId = Long.parseLong(request.getHeader("X-User-Id"));
 
-            User userDetails = userService.findUserById(userId);
+        // Пропускаем OPTIONS запросы и публичные эндпоинты
+        String path = request.getRequestURI();
+        if (request.getMethod().equals("OPTIONS") ||
+                path.contains("/api/v1/auth/register") ||
+                path.contains("/api/v1/auth/login")) {
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (NumberFormatException err) {
             filterChain.doFilter(request, response);
-        } finally {
-            SecurityContextHolder.clearContext();
+            return; // Важно: сразу возвращаемся и не выполняем дальнейший код
         }
 
+        // Проверяем заголовок X-User-Id
+        String userIdHeader = request.getHeader("X-User-Id");
+        if (userIdHeader != null) {
+            try {
+                Long userId = Long.parseLong(userIdHeader);
+                User userDetails = userService.findUserById(userId);
+
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                // Продолжаем обработку с установленной аутентификацией
+                filterChain.doFilter(request, response);
+
+                // Очищаем контекст безопасности после обработки запроса
+                SecurityContextHolder.clearContext();
+                return; // Важно: сразу возвращаемся
+
+            } catch (Exception e) {
+                // Ошибка аутентификации - очищаем контекст и продолжаем как неаутентифицированный
+                SecurityContextHolder.clearContext();
+            }
+        }
+
+        // Если нет заголовка или произошла ошибка, продолжаем без аутентификации
+        filterChain.doFilter(request, response);
     }
 }

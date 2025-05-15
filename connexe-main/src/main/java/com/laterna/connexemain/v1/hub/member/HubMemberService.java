@@ -72,4 +72,16 @@ public class HubMemberService {
 
         return hubMemberMapper.toDTO(createHubMember(hub, user));
     }
+
+    @Transactional(readOnly = true)
+    public HubMember findHubMemberById(Long memberId) {
+        return hubMemberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public HubMemberDTO getMemberMe(Long hubId, User currentUser) {
+        return hubMemberRepository.findByHubIdAndUserId(hubId, currentUser.getId())
+                .map(hubMemberMapper::toDTO)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+    }
 }

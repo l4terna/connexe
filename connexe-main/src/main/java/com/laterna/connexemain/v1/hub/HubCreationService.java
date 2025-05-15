@@ -1,11 +1,10 @@
 package com.laterna.connexemain.v1.hub;
 
+import com.laterna.connexemain.v1.hub.avatar.HubAvatarService;
 import com.laterna.connexemain.v1.hub.dto.CreateHubDTO;
 import com.laterna.connexemain.v1.hub.dto.HubDTO;
 import com.laterna.connexemain.v1.hub.enumeration.HubType;
-import com.laterna.connexemain.v1.hub.avatar.HubAvatarService;
 import com.laterna.connexemain.v1.hub.member.HubMemberService;
-import com.laterna.connexemain.v1.media.LocalMediaStorageService;
 import com.laterna.connexemain.v1.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ public class HubCreationService {
     private final HubRepository hubRepository;
     private final HubMemberService hubMemberService;
     private final HubMapper hubMapper;
-    private final LocalMediaStorageService localMediaStorageService;
     private final HubAvatarService hubAvatarService;
 
     @Transactional

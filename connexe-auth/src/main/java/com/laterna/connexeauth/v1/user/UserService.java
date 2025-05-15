@@ -16,6 +16,7 @@ import java.time.Instant;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
     public User findUserById(Long userId) {
