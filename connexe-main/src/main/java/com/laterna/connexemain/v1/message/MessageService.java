@@ -125,9 +125,13 @@ public class MessageService {
     public void delete(Long channelId, Long messageId, User currentUser) {
         Message message = findMessageById(messageId);
 
-        if (!message.getChannelId().equals(channelId) ||
-                !message.getAuthor().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("Permission denied");
+        if (!message.getChannelId().equals(channelId)) {
+            throw new AccessDeniedException("Access denied");
+        }
+
+        if (!message.getAuthor().getId().equals(currentUser.getId())) {
+            hiddenMessageService.hide(channelId, messageId, currentUser);
+            return;
         }
 
         Channel channel = channelService.findChannelById(channelId);
