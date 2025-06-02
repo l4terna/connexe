@@ -1,4 +1,7 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
   application:
     name: connexe-main
   config:

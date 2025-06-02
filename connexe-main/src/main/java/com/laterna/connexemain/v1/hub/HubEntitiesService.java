@@ -4,7 +4,7 @@ import com.laterna.connexemain.v1.category.CategoryService;
 import com.laterna.connexemain.v1.category.dto.CategoryDTO;
 import com.laterna.connexemain.v1.channel.ChannelMapper;
 import com.laterna.connexemain.v1.channel.ChannelService;
-import com.laterna.connexemain.v1.channel.dto.ChannelDTO;
+import com.laterna.connexemain.v1.channel.dto.HubChannelDTO;
 import com.laterna.connexemain.v1.channel.dto.HubEntitiesDTO;
 import com.laterna.connexemain.v1.channel.voice.ChannelVoiceService;
 import com.laterna.connexemain.v1.user.User;
@@ -36,7 +36,7 @@ public class HubEntitiesService {
     public HubEntitiesDTO getHubEntities(Long hubId, User currentUser) {
         List<CategoryDTO> categories = categoryService.getAllCategories(hubId);
 
-        List<ChannelDTO> channels = channelService.findAllChannelsByHubId(hubId)
+        List<HubChannelDTO> channels = channelService.findAllChannelsByHubId(hubId)
                 .stream()
                 .map(channel -> {
             Set<Long> userIds = channelVoiceService.getUserIdsByChannelId(channel.getId());
@@ -56,7 +56,7 @@ public class HubEntitiesService {
                 return userMapper.toDTO(user, userSettings);
             }).toList();
 
-            return channelMapper.toDTO(channel, users);
+            return channelMapper.toHubDTO(channel, users);
         }).toList();
 
         return HubEntitiesDTO.builder()

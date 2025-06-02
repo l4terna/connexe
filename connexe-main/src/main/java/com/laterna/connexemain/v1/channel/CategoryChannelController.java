@@ -1,6 +1,6 @@
 package com.laterna.connexemain.v1.channel;
 
-import com.laterna.connexemain.v1.channel.dto.ChannelDTO;
+import com.laterna.connexemain.v1.channel.dto.HubChannelDTO;
 import com.laterna.connexemain.v1.channel.dto.CreateHubChannelDTO;
 import com.laterna.connexemain.v1.user.User;
 import jakarta.validation.Valid;
@@ -16,7 +16,7 @@ public class CategoryChannelController {
     private final ChannelCreationService channelCreationService;
 
     @PostMapping
-    public ResponseEntity<ChannelDTO> createHubChannel(
+    public ResponseEntity<HubChannelDTO> createHubChannel(
             @PathVariable Long hubId,
             @Valid @RequestBody CreateHubChannelDTO dto,
             @AuthenticationPrincipal User user) {

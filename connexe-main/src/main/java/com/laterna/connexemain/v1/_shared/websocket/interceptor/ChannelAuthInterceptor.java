@@ -1,6 +1,6 @@
 package com.laterna.connexemain.v1._shared.websocket.interceptor;
 
-import com.laterna.connexemain.v1._shared.integration.AuthServiceClient;
+import com.laterna.connexemain.v1._shared.integration.auth.AuthServiceClient;
 import com.laterna.connexemain.v1.user.User;
 import com.laterna.connexemain.v1.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,6 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

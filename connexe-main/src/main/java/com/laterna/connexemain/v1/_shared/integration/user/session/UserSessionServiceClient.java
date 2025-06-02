@@ -1,4 +1,4 @@
-package com.laterna.connexemain.v1.user.integration;
+package com.laterna.connexemain.v1._shared.integration.user.session;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.ServiceException;
@@ -15,12 +15,11 @@ public class UserSessionServiceClient {
 
     private final WebClient.Builder webClientBuilder;
 
-    public Mono<UserLastActivityDTO> getLastActivity(Long userId) {
+    public UserLastActivityDTO getLastActivity(Long userId) {
         return webClientBuilder
                 .build()
                 .get()
                 .uri("lb://connexe-auth/api/v1/users/" + userId + "/last-activity")
-                .header("X-User-Id", userId.toString())
                 .retrieve()
                 .bodyToMono(String.class)
                 .map(jsonString -> {
@@ -34,6 +33,21 @@ public class UserSessionServiceClient {
                 })
                 .onErrorResume(error -> {
                     return Mono.error(new ServiceException("Error during get an activity", error));
-                });
+                })
+                .block();
+    }
+
+    public Long getUserIdByFingerprint(String fingerprint, Long userId) {
+        return webClientBuilder
+                .build()
+                .get()
+                .uri("lb://connexe-auth/api/v1/users/" + userId)
+                .cookie("__fprid", fingerprint)
+                .retrieve()
+                .bodyToMono(Long.class)
+                .onErrorResume(error -> {
+                    return Mono.error(new ServiceException("Error during get an user id", error));
+                })
+                .block();
     }
 }

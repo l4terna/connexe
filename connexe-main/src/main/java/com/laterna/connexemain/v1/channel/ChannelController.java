@@ -1,6 +1,7 @@
 package com.laterna.connexemain.v1.channel;
 
-import com.laterna.connexemain.v1.channel.dto.ChannelDTO;
+import com.laterna.connexemain.v1.channel.dto.DirectChannelDTO;
+import com.laterna.connexemain.v1.channel.dto.HubChannelDTO;
 import com.laterna.connexemain.v1.channel.dto.CreateDirectChannelDTO;
 import com.laterna.connexemain.v1.channel.dto.UpdateChannelDTO;
 import com.laterna.connexemain.v1.user.User;
@@ -23,14 +24,14 @@ public class ChannelController {
     private final ChannelCreationService channelCreationService;
 
     @GetMapping
-    public ResponseEntity<Page<ChannelDTO>> getDirectAndGroupChannels(
+    public ResponseEntity<Page<DirectChannelDTO>> getDirectAndGroupChannels(
             @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(channelService.getDirectAndGroupChannels(pageable, user));
     }
 
     @PostMapping
-    public ResponseEntity<ChannelDTO> createDirectChannel(
+    public ResponseEntity<DirectChannelDTO> createDirectChannel(
             @Valid @RequestBody CreateDirectChannelDTO createChannelDTO,
             @AuthenticationPrincipal User user
     ) {
@@ -38,7 +39,7 @@ public class ChannelController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ChannelDTO> updateChannel(
+    public ResponseEntity<HubChannelDTO> updateChannel(
             @PathVariable Long id,
             @Valid @RequestBody UpdateChannelDTO updateChannelDTO,
             @AuthenticationPrincipal User user

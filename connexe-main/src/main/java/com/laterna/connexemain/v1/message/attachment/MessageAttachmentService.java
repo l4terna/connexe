@@ -3,6 +3,7 @@ package com.laterna.connexemain.v1.message.attachment;
 import com.laterna.connexemain.v1.media.LocalMediaStorageService;
 import com.laterna.connexemain.v1.media.Media;
 import com.laterna.connexemain.v1.media.enumeration.MediaVisibility;
+import com.laterna.connexemain.v1.message.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,20 +19,20 @@ public class MessageAttachmentService {
     private final LocalMediaStorageService localMediaStorageService;
 
     @Transactional
-    public void save(MultipartFile[] files, Long messageId, Long userId) {
+    public List<MessageAttachment> save(MultipartFile[] files, Message message, Long userId) {
         List<MessageAttachment> attachments = new ArrayList<>();
 
         for (MultipartFile file : files) {
-            Media media = localMediaStorageService.store(file, MediaVisibility.PUBLIC, userId);
+            Media media = localMediaStorageService.store(file, MediaVisibility.PRIVATE, userId);
 
             MessageAttachment attachment = MessageAttachment.builder()
-                    .mediaId(media.getId())
-                    .messageId(messageId)
+                    .media(media)
+                    .message(message)
                     .build();
 
             attachments.add(attachment);
         }
 
-        messageAttachmentRepository.saveAll(attachments);
+        return messageAttachmentRepository.saveAll(attachments);
     }
 }

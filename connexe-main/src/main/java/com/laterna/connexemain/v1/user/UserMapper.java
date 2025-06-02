@@ -1,11 +1,12 @@
 package com.laterna.connexemain.v1.user;
 
+import com.laterna.connexemain.v1._shared.integration.user.session.UserSessionServiceClient;
 import com.laterna.connexemain.v1.user.dto.UserDTO;
-import com.laterna.connexemain.v1.user.integration.UserSessionServiceClient;
 import com.laterna.connexemain.v1.user.presence.UserPresenceService;
 import com.laterna.connexemain.v1.user.presence.enumeration.Presence;
 import com.laterna.connexemain.v1.user.settings.p2p.dto.P2PSettingsDTO;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
@@ -32,8 +33,6 @@ public abstract class UserMapper {
             return null;
         }
 
-        return userSessionServiceClient.getLastActivity(userId)
-                .map(lastActivity -> Instant.now())
-                .block();
+        return Instant.ofEpochMilli(userSessionServiceClient.getLastActivity(userId).getLastActivityTimestamp());
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface MediaStorageService {
     Media store(MultipartFile file, MediaVisibility mediaVisibility, Long createdById);
 
-    MediaRetrieveDTO retrieve(String storageKey);
+    MediaRetrieveDTO retrieve(String storageKey, String sign, Long userId, String fingerprint);
 
     void delete(String storageKey);
 }

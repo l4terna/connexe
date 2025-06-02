@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.multipart.MultipartFile;
 
 public record CreateMessageDTO(
-        @NotBlank
         String content,
+        Long replyId,
         MultipartFile[] attachments
 ) {
 }

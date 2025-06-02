@@ -81,7 +81,7 @@ public class JwtAuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Jw
         return excludedPaths.stream()
                 .anyMatch(pattern -> {
                     if (pattern.endsWith("/**")) {
-                        String prefix = pattern.substring(0, pattern.length() - 3);
+                        String prefix = pattern.substring(0, pattern.length() - 2);
                         return path.startsWith(prefix);
                     }
                     return path.equals(pattern);

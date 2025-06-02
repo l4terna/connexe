@@ -1,14 +1,17 @@
 package com.laterna.connexemain.v1.media;
 
+import com.laterna.connexemain.v1._shared.integration.user.session.UserSessionServiceClient;
 import com.laterna.connexemain.v1.media.dto.MediaRetrieveDTO;
 import com.laterna.connexemain.v1.media.enumeration.MediaVisibility;
 import com.laterna.connexemain.v1.media.service.MediaStorageService;
+import com.laterna.connexemain.v1.media.sign.MediaSignService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +24,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class LocalMediaStorageService implements MediaStorageService {
+    private final UserSessionServiceClient userSessionServiceClient;
+    private final MediaSignService mediaSignService;
     @Value("${app.media.dir}")
     private String mediaDir;
 
@@ -29,8 +34,8 @@ public class LocalMediaStorageService implements MediaStorageService {
     @Override
     @Transactional
     public Media store(MultipartFile file,
-                        MediaVisibility mediaVisibility,
-                        Long createdById) {
+                       MediaVisibility mediaVisibility,
+                       Long createdById) {
         createDirsIfNotExists();
 
         String filename = UUID.randomUUID() + "." + FilenameUtils.getExtension(file.getOriginalFilename());
@@ -66,9 +71,18 @@ public class LocalMediaStorageService implements MediaStorageService {
 
     @Override
     @Transactional(readOnly = true)
-    public MediaRetrieveDTO retrieve(String storageKey) {
-        Media media = mediaRepository.findByFirstStorageKey(storageKey)
+    public MediaRetrieveDTO retrieve(String storageKey, String sign, Long userId, String fingerprint) {
+        Media media = mediaRepository.findFirstByStorageKey(storageKey)
                 .orElseThrow(() -> new EntityNotFoundException("Media not found"));
+
+        if (media.getVisibility() == MediaVisibility.PRIVATE) {
+            if ((sign == null || userId == null || fingerprint == null)
+                    || (userSessionServiceClient.getUserIdByFingerprint(fingerprint, userId) == null
+                        || !mediaSignService.validateSign(sign, userId))
+            ) {
+                throw new AccessDeniedException("Access denied");
+            }
+        }
 
         String filename = media.getStorageKey() + "." + media.getExtension();
         String filepath = mediaDir + "/" + filename;
@@ -76,7 +90,7 @@ public class LocalMediaStorageService implements MediaStorageService {
         File file = new File(filepath);
         if (!file.exists()) {
             log.error("File not found on disk: {}", filepath);
-            throw new RuntimeException("File not found on disk: " + filepath);
+            throw new RuntimeException("File not found: " + filepath);
         }
 
         try {
@@ -110,7 +124,7 @@ public class LocalMediaStorageService implements MediaStorageService {
     @Transactional
     @Override
     public void delete(String storageKey) {
-        Media media = mediaRepository.findByFirstStorageKey(storageKey)
+        Media media = mediaRepository.findFirstByStorageKey(storageKey)
                 .orElseThrow(() -> new EntityNotFoundException("Media not found"));
 
         mediaRepository.delete(media);

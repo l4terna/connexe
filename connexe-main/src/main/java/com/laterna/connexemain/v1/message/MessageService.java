@@ -5,6 +5,8 @@ import com.laterna.connexemain.v1.channel.ChannelService;
 import com.laterna.connexemain.v1.channel.enumeration.ChannelType;
 import com.laterna.connexemain.v1.hub.Hub;
 import com.laterna.connexemain.v1.hub.HubService;
+import com.laterna.connexemain.v1.message.attachment.MessageAttachment;
+import com.laterna.connexemain.v1.message.attachment.MessageAttachmentService;
 import com.laterna.connexemain.v1.message.dto.CreateMessageDTO;
 import com.laterna.connexemain.v1.message.dto.GetMessagesFilter;
 import com.laterna.connexemain.v1.message.dto.MessageDTO;
@@ -12,7 +14,7 @@ import com.laterna.connexemain.v1.message.dto.UpdateMessageDTO;
 import com.laterna.connexemain.v1.message.event.MessageCreatedEvent;
 import com.laterna.connexemain.v1.message.event.MessageDeletedEvent;
 import com.laterna.connexemain.v1.message.event.MessageUpdatedEvent;
-import com.laterna.connexemain.v1.message.attachment.MessageAttachmentService;
+import com.laterna.connexemain.v1.message.hidden.HiddenMessageService;
 import com.laterna.connexemain.v1.message.read.MessageReadStatus;
 import com.laterna.connexemain.v1.message.read.MessageReadStatusService;
 import com.laterna.connexemain.v1.message.read.enumeration.MessageStatus;
@@ -20,6 +22,7 @@ import com.laterna.connexemain.v1.permission.PermissionService;
 import com.laterna.connexemain.v1.permission.enumeration.Permission;
 import com.laterna.connexemain.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -30,9 +33,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,9 +48,16 @@ public class MessageService {
     private final ApplicationEventPublisher eventPublisher;
     private final MessageReadStatusService messageReadStatusService;
     private final MessageAttachmentService messageAttachmentService;
+    private final HiddenMessageService hiddenMessageService;
 
     @Transactional
     public MessageDTO create(Long channelId, CreateMessageDTO createMessageDTO, User currentUser) {
+        if (createMessageDTO.content() == null) {
+            if (Arrays.stream(createMessageDTO.attachments()).findAny().isEmpty()) {
+                throw new ValidationException("Message content is null");
+            }
+        }
+
         Channel channel = channelService.findChannelById(channelId);
 
         if (channel.getType() == ChannelType.VOICE || channel.getType() == ChannelType.TEXT) {
@@ -57,24 +65,38 @@ public class MessageService {
             permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.SEND_MESSAGES);
         }
 
+        Message replyMessage = null;
+
+        if (createMessageDTO.replyId() != null) {
+            replyMessage = findMessageById(createMessageDTO.replyId());
+
+            if (!replyMessage.getChannelId().equals(channelId)) {
+                throw new AccessDeniedException("Access denied");
+            }
+        }
+
         Message message = Message.builder()
                 .content(createMessageDTO.content())
+                .reply(replyMessage)
                 .author(currentUser)
                 .channelId(channel.getId())
                 .build();
 
+        Message newMessage = messageRepository.save(message);
+
+        if (createMessageDTO.attachments() != null) {
+            List<MessageAttachment> attachments = messageAttachmentService.save(createMessageDTO.attachments(), newMessage, currentUser.getId());
+            newMessage.setAttachments(attachments);
+        }
+
         MessageDTO newMessageDTO;
 
         if (channel.getType() == ChannelType.DC) {
-            newMessageDTO = messageMapper.toDTO(messageRepository.save(message), MessageStatus.SENT);
+            newMessageDTO = messageMapper.toDTO(newMessage, MessageStatus.SENT);
         } else if (channel.getType() == ChannelType.GROUP_DC || channel.getType() == ChannelType.TEXT) {
-            newMessageDTO = messageMapper.toDTO(messageRepository.save(message), MessageStatus.SENT, 0);
+            newMessageDTO = messageMapper.toDTO(newMessage, MessageStatus.SENT, 0);
         } else {
-            newMessageDTO = messageMapper.toDTO(messageRepository.save(message));
-        }
-
-        if (createMessageDTO.attachments() != null) {
-            messageAttachmentService.save(createMessageDTO.attachments(), newMessageDTO.id(), currentUser.getId());
+            newMessageDTO = messageMapper.toDTO(newMessage);
         }
 
         messageReadStatusService.createReadStatus(currentUser.getId(), newMessageDTO.id());
@@ -122,15 +144,15 @@ public class MessageService {
     }
 
     @Transactional
-    public void delete(Long channelId, Long messageId, User currentUser) {
+    public void delete(Long channelId, Long messageId, boolean forEveryone, User currentUser) {
         Message message = findMessageById(messageId);
 
         if (!message.getChannelId().equals(channelId)) {
             throw new AccessDeniedException("Access denied");
         }
 
-        if (!message.getAuthor().getId().equals(currentUser.getId())) {
-            hiddenMessageService.hide(channelId, messageId, currentUser);
+        if (!forEveryone) {
+            hiddenMessageService.hide(message, currentUser);
             return;
         }
 
@@ -138,7 +160,10 @@ public class MessageService {
 
         if (channel.getType() == ChannelType.VOICE || channel.getType() == ChannelType.TEXT) {
             Hub hub = hubService.findHubByChannelId(message.getChannelId());
-            permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.SEND_MESSAGES);
+
+            if (!message.getAuthor().getId().equals(currentUser.getId())) {
+                permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.MANAGE_MESSAGES);
+            }
         }
 
         messageRepository.delete(message);
@@ -155,13 +180,19 @@ public class MessageService {
         List<Message> messages;
 
         if (filter.getBefore() != null && filter.getBefore() > 0) {
-            messages = messageRepository.findAllByChannelIdAndBeforeId(channelId, filter.getBefore(), pageable);
+            messages = messageRepository
+                    .findAllByChannelIdAndBeforeId(channelId, filter.getBefore(), currentUser.getId(), filter.getSearch(), pageable);
         } else if (filter.getAfter() != null && filter.getAfter() > 0) {
-            messages = messageRepository.findAllByChannelIdAndAfterId(channelId, filter.getAfter(), pageable);
+            messages = messageRepository
+                    .findAllByChannelIdAndAfterId(channelId, filter.getAfter(), currentUser.getId(), pageable);
         } else if (filter.getAround() != null && filter.getAround() > 0) {
-            messages = messageRepository.findAllByChannelIdAndAroundId(channelId, filter.getAround(), pageable);
+            messages = messageRepository
+                    .findAllByChannelIdAndAroundId(channelId, filter.getAround(), currentUser.getId(), filter.getSize() / 2);
+
+            messages.sort(Comparator.comparing(Message::getId));
         } else {
-            messages = messageRepository.findAllByChannelId(channelId, pageable);
+            messages = messageRepository
+                    .findAllByChannelId(channelId, currentUser.getId(), filter.getSearch(), pageable);
         }
 
         return switch (channel.getType()) {

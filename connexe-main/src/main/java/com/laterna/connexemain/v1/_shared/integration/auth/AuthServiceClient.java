@@ -1,9 +1,7 @@
-package com.laterna.connexemain.v1._shared.integration;
+package com.laterna.connexemain.v1._shared.integration.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;

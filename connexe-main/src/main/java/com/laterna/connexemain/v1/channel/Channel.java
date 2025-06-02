@@ -2,6 +2,7 @@ package com.laterna.connexemain.v1.channel;
 
 import com.laterna.connexemain.v1._shared.model.entity.BaseEntity;
 import com.laterna.connexemain.v1.channel.enumeration.ChannelType;
+import com.laterna.connexemain.v1.channel.member.ChannelMember;
 import com.laterna.connexemain.v1.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -31,4 +34,7 @@ public class Channel extends BaseEntity {
 
     private Integer position;
     private String name;
+
+    @OneToMany(mappedBy = "channel")
+    private List<ChannelMember> members;
 }

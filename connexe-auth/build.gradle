@@ -59,7 +59,7 @@ dependencies {
 	implementation files("${rootProject.projectDir}/libs/kafka-schema-registry-client-7.9.0.jar")
 //    implementation 'io.confluent:kafka-protobuf-serializer:7.9.0'
 //    implementation 'io.confluent:kafka-schema-registry-client:7.9.0'
-
+	implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 	implementation project(':connexe-protobuf-schemas')
 }
 

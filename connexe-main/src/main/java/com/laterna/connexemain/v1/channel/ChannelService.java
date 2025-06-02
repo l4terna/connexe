@@ -2,7 +2,8 @@ package com.laterna.connexemain.v1.channel;
 
 import com.laterna.connexemain.v1.category.Category;
 import com.laterna.connexemain.v1.category.CategoryService;
-import com.laterna.connexemain.v1.channel.dto.ChannelDTO;
+import com.laterna.connexemain.v1.channel.dto.DirectChannelDTO;
+import com.laterna.connexemain.v1.channel.dto.HubChannelDTO;
 import com.laterna.connexemain.v1.channel.dto.UpdateChannelDTO;
 import com.laterna.connexemain.v1.channel.enumeration.ChannelType;
 import com.laterna.connexemain.v1.hub.Hub;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +46,7 @@ public class ChannelService {
     }
 
     @Transactional
-    public ChannelDTO update(Long id, UpdateChannelDTO updateChannelDTO, User currentUser) {
+    public HubChannelDTO update(Long id, UpdateChannelDTO updateChannelDTO, User currentUser) {
         Channel channel = findChannelById(id);
 
         if (channel.getType() != ChannelType.TEXT && channel.getType() != ChannelType.VOICE) {
@@ -77,7 +79,7 @@ public class ChannelService {
             channel.setPosition(newPosition);
         }
 
-        return channelMapper.toDTO(channelRepository.save(channel));
+        return channelMapper.toHubDTO(channelRepository.save(channel));
     }
 
     @Transactional(readOnly = true)
@@ -100,8 +102,8 @@ public class ChannelService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ChannelDTO> getDirectAndGroupChannels(Pageable pageable, User user) {
+    public Page<DirectChannelDTO> getDirectAndGroupChannels(Pageable pageable, User user) {
         return channelRepository.findAllUserChannels(user.getId(), pageable)
-                .map(channelMapper::toDTO);
+                .map(channel -> channelMapper.toDirectDTO(channel, user.getId()));
     }
 }

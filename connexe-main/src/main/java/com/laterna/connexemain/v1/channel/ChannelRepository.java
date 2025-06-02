@@ -60,6 +60,7 @@ interface ChannelRepository extends JpaRepository<Channel, Long> {
             """)
     Set<Long> findAllChannelIdsByUserId(Long userId);
 
+    @EntityGraph(attributePaths = {"members.user", "members.channel"})
     @Query("""
                 SELECT c FROM Channel c JOIN ChannelMember cm ON c.id = cm.channel.id
                 WHERE cm.user.id = :userId

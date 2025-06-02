@@ -8,6 +8,6 @@ import java.util.List;
 @Builder
 public record HubEntitiesDTO (
         List<CategoryDTO> categories,
-        List<ChannelDTO> channels
+        List<HubChannelDTO> channels
 ) {
 }

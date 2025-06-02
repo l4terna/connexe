@@ -23,4 +23,9 @@ public class UserController {
         userSessionService.updateLastActivity(id, userLastActivityUpdate);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}")
+    public Long getUserIdByFingerprint(@PathVariable Long id, @CookieValue("__fprid") String fingerprint) {
+        return userSessionService.findUserSessionByUserIdAndFingerprint(id, fingerprint).getUser().getId();
+    }
 }

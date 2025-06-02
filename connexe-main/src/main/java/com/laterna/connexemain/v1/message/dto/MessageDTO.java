@@ -10,6 +10,7 @@ import java.util.List;
 public record MessageDTO(
         Long id,
         String content,
+        SimpleMessageDTO reply,
         Instant createdAt,
         Instant lastModifiedAt,
         UserDTO author,

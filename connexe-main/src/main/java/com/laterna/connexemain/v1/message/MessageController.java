@@ -55,9 +55,10 @@ public class MessageController {
     public ResponseEntity<Void> deleteMessage(
             @PathVariable Long channelId,
             @PathVariable Long messageId,
+            @RequestParam(required = false, name = "for_everyone", defaultValue = "false") boolean forEveryone,
             @AuthenticationPrincipal User user
     ) {
-        messageService.delete(channelId, messageId, user);
+        messageService.delete(channelId, messageId, forEveryone, user);
 
         return ResponseEntity.noContent().build();
     }

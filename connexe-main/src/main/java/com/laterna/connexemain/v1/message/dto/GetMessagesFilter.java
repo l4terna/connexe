@@ -1,6 +1,7 @@
 package com.laterna.connexemain.v1.message.dto;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,4 +23,11 @@ public class GetMessagesFilter {
     @Parameter(description = "Message count", example = "50")
     @Positive
     private Integer size = 50;
+
+    @Parameter(description = "Search message by channel id", example = "Some message")
+    private String search = "";
+
+    public String getSearch() {
+        return "%" + search + "%";
+    }
 }

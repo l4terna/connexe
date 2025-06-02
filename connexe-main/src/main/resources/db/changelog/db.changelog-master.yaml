@@ -32,6 +32,10 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/19_create_user_settings.sql
   - include:
-      file: db/changelog/changes/20_p2p_settings.sql
+      file: db/changelog/changes/20_create_p2p_settings.sql
   - include:
-      file: db/changelog/changes/21_hub_mutes.sql
+      file: db/changelog/changes/21_create_hub_mutes.sql
+  - include:
+      file: db/changelog/changes/22_create_hidden_messages.sql
+  - include:
+      file: db/changelog/changes/23_create_media_sign.sql

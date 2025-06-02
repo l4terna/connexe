@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,8 +15,13 @@ public class MediaController {
     private final LocalMediaStorageService localMediaStorageService;
 
     @GetMapping("/{storageKey}")
-    public ResponseEntity<InputStreamResource> retrieveMedia(@PathVariable String storageKey) {
-        MediaRetrieveDTO dto = localMediaStorageService.retrieve(storageKey);
+    public ResponseEntity<InputStreamResource> retrieveMedia(
+            @PathVariable String storageKey,
+            @RequestParam(name = "sign", required = false) String sign,
+            @RequestParam(name = "user_id", required = false) Long userId,
+            @CookieValue(name = "__fprid", required = false) String fingerprint
+    ) {
+        MediaRetrieveDTO dto = localMediaStorageService.retrieve(storageKey, sign, userId, fingerprint);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(dto.contentType()))

@@ -2,7 +2,8 @@ package com.laterna.connexemain.v1.channel;
 
 import com.laterna.connexemain.v1.category.Category;
 import com.laterna.connexemain.v1.category.CategoryService;
-import com.laterna.connexemain.v1.channel.dto.ChannelDTO;
+import com.laterna.connexemain.v1.channel.dto.DirectChannelDTO;
+import com.laterna.connexemain.v1.channel.dto.HubChannelDTO;
 import com.laterna.connexemain.v1.channel.dto.CreateDirectChannelDTO;
 import com.laterna.connexemain.v1.channel.dto.CreateHubChannelDTO;
 import com.laterna.connexemain.v1.channel.enumeration.ChannelType;
@@ -29,7 +30,7 @@ public class ChannelCreationService {
     private final ChannelMemberCreationService channelMemberCreationService;
 
     @Transactional
-    public ChannelDTO createHubChannel(Long hubId, CreateHubChannelDTO createChannelDTO, User currentUser) {
+    public HubChannelDTO createHubChannel(Long hubId, CreateHubChannelDTO createChannelDTO, User currentUser) {
         Category category = categoryService.findCategoryByIdWithHub(createChannelDTO.categoryId());
 
         if (createChannelDTO.type() != ChannelType.TEXT && createChannelDTO.type() != ChannelType.VOICE) {
@@ -46,11 +47,11 @@ public class ChannelCreationService {
                 .position(channelService.getLastPosition(category.getId()))
                 .build();
 
-        return channelMapper.toDTO(channelRepository.save(channel));
+        return channelMapper.toHubDTO(channelRepository.save(channel));
     }
 
     @Transactional
-    public ChannelDTO createDirectChannel(CreateDirectChannelDTO createChannelDTO, User currentUser) {
+    public DirectChannelDTO createDirectChannel(CreateDirectChannelDTO createChannelDTO, User currentUser) {
         Channel channel;
 
         createChannelDTO.members().add(currentUser.getId());
@@ -70,7 +71,7 @@ public class ChannelCreationService {
             channel = createGroupChannel(createChannelDTO.members(), currentUser);
         }
 
-        return channelMapper.toDTO(channel);
+        return channelMapper.toDirectDTO(channel, currentUser.getId());
     }
 
     private Channel createDirectChannel(List<Long> memberIds) {

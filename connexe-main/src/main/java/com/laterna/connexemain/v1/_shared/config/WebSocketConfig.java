@@ -1,6 +1,8 @@
 package com.laterna.connexemain.v1._shared.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.laterna.connexemain.v1._shared.websocket.error.StompSubProtocolErrorHandlerImpl;
 import com.laterna.connexemain.v1._shared.websocket.interceptor.*;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.scheduling.TaskScheduler;
@@ -18,6 +21,8 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+
+import java.util.List;
 
 
 @Configuration
@@ -31,6 +36,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final StompSubProtocolErrorHandlerImpl stompSubProtocolErrorHandlerImpl;
     private final UserPresenceUpdateInterceptor userPresenceUpdateInterceptor;
     private final ChannelActiveUpdateInterceptor channelActiveUpdateInterceptor;
+    private final ObjectMapper objectMapper;
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
@@ -69,15 +75,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         );
     }
 
-    @Bean
-    public MappingJackson2MessageConverter jacksonMessageConverter(ObjectMapper objectMapper) {
-        DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
-        resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
-
+    @Override
+    public boolean configureMessageConverters(List<MessageConverter> messageConverters) {
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-        converter.setObjectMapper(objectMapper);
-        converter.setContentTypeResolver(resolver);
-        return converter;
+        ObjectMapper websocketOM = objectMapper.copy();
+        websocketOM.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        converter.setObjectMapper(websocketOM);
+        messageConverters.add(converter);
+
+        return false;
     }
 
     @Bean
